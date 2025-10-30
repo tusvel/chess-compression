@@ -1,0 +1,1 @@
+int compression(char** paths, int quantity);
