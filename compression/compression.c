@@ -3,12 +3,11 @@
 #include "compression.h"
 #include "../check_format/check_format.h"
 #include "../open_files/open_files.h"
+#include "../fill_header/fill_header.h"
 
-int height = 1000;
-int width = 1000;
+#define WIDTH 1000
+#define HEIGHT 1000
 
-// Prototype
-FILE* create_output();
 void compress_image(int width, int height, RGBTRIPLE (*image)[width], FILE** files);
 
 int compression(char** paths, int quantity)
@@ -21,14 +20,20 @@ int compression(char** paths, int quantity)
     }
 
     // Check format input files.
-    bool corrected = check_format(files, quantity);
-    if (!corrected)
+    for (int i = 0; i < quantity; i++)
     {
-        return 1;
+        bool corrected = check_format(files[i]);
+        if (!corrected)
+        {
+            return 1;
+        }
     }
 
+
     // Create output file.
-    FILE* output = create_output();
+    
+    FILE* output = fopen("res.bmp", "w");
+    fill_header(output);
 
     // Skip header in input files.
     for (int i = 0; i < quantity; i++)
@@ -38,12 +43,12 @@ int compression(char** paths, int quantity)
     }
 
     // Draft for output image 1000 by 1000px;
-    RGBTRIPLE (*image)[width] = calloc(height, width * sizeof(RGBTRIPLE));
-    compress_image(width, height, image, files);
+    RGBTRIPLE (*image)[WIDTH] = calloc(HEIGHT, WIDTH * sizeof(RGBTRIPLE));
+    compress_image(WIDTH, HEIGHT, image, files);
 
-    for (int i = 0; i < height; i++)
+    for (int i = 0; i < HEIGHT; i++)
     {
-        fwrite(image[i], sizeof(RGBTRIPLE), width, output);
+        fwrite(image[i], sizeof(RGBTRIPLE), WIDTH, output);
     }
 
     // Close input files.
@@ -60,30 +65,6 @@ int compression(char** paths, int quantity)
     fclose(output);
 
     return 0;
-}
-
-
-// Create output file.
-FILE* create_output()
-{
-    // Open file with bmp header.
-    FILE* header = fopen("header.txt", "r");
-
-    // Create output file.
-    FILE* output = fopen("res.bmp", "w");
-
-    BITMAPFILEHEADER bf;
-    fread(&bf, sizeof(BITMAPFILEHEADER), 1, header);
-
-    BITMAPINFOHEADER bi;
-    fread(&bi, sizeof(BITMAPINFOHEADER), 1, header);
-
-    fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, output);
-    fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, output);
-
-    fclose(header);
-
-    return output;
 }
 
 // Create compress image.

@@ -2,4 +2,4 @@
 #include <stdio.h>
 #include "../bmp.h"
 
-bool check_format(FILE* files[], int quantity);
+bool check_format(FILE* file);
