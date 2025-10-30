@@ -115,14 +115,14 @@ int decompression(char* path)
         fwrite(image2[i], sizeof(RGBTRIPLE), WIDTH, output_files[1]);
     }
 
-    // fclose(compressed);
+    fclose(compressed);
     for (int i = 0; i < 2; i++)
     {
         fclose(output_files[i]);
     }
-    // free(output_paths);
-    // free(images[0]);
-    // free(image2);
+    free(output_paths);
+    free(image1);
+    free(image2);
 
     return 0;
 }
