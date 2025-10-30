@@ -4,20 +4,23 @@
 #include "../check_format/check_format.h"
 #include "../open_files/open_files.h"
 
+int height = 1000;
+int width = 1000;
+
 // Prototype
 FILE* create_output();
 void compress_image(int width, int height, RGBTRIPLE (*image)[width], FILE** files);
 
 int compression(char** paths, int quantity)
 {
-    // Ptr to arr of input files path.
+    // Input files.
     FILE** files = open_files(paths, quantity, "r");
     if (files == NULL)
     {
         return 1;
     }
 
-    // Check corrected format.
+    // Check format input files.
     bool corrected = check_format(files, quantity);
     if (!corrected)
     {
@@ -27,18 +30,16 @@ int compression(char** paths, int quantity)
     // Create output file.
     FILE* output = create_output();
 
-    // Skeep header in all files
+    // Skip header in input files.
     for (int i = 0; i < quantity; i++)
     {
         fseek(files[i], sizeof(BITMAPFILEHEADER), SEEK_SET);
         fseek(files[i], sizeof(BITMAPINFOHEADER), SEEK_CUR);
     }
 
-    // Draft for output file 1000 by 1000px;
-    int width = 1000;
-    int height = 1000;
+    // Draft for output image 1000 by 1000px;
     RGBTRIPLE (*image)[width] = calloc(height, width * sizeof(RGBTRIPLE));
-    compress_image(1000, 1000, image, files);
+    compress_image(width, height, image, files);
 
     for (int i = 0; i < height; i++)
     {
@@ -62,9 +63,10 @@ int compression(char** paths, int quantity)
 }
 
 
-
+// Create output file.
 FILE* create_output()
 {
+    // Open file with bmp header.
     FILE* header = fopen("header.txt", "r");
 
     // Create output file.
@@ -84,9 +86,10 @@ FILE* create_output()
     return output;
 }
 
-// Compress image.
+// Create compress image.
 void compress_image(int width, int height, RGBTRIPLE (*image)[width], FILE** files)
 {
+    // Fill image with files[0] and files[1] by chess order.
     for (int i = 0; i < height; i++)
     {
         for (int j = 0; j < width; j++)
